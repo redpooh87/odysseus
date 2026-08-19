@@ -350,9 +350,9 @@ class ToolIndex:
         # request (e.g. "visit <url> and tell me the title"), force-including the
         # whole email toolset and crowding out the relevant tools — the model then
         # believed it had only email tools and refused web/other tasks (#1707).
-        frozenset({"email", "emails", "mail", "mails", "gmail", "googlemail", "message", "messages", "send", "reply", "replies", "inbox", "unread"}):
+        frozenset({"email", "emails", "mail", "mails", "gmail", "googlemail", "message", "messages", "send", "reply", "replies", "inbox", "unread", "이메일", "메일", "받은편지함", "편지함", "수신함", "답장", "메일함", "보낸메일"}):
             {"list_email_accounts", "list_emails", "read_email", "scan_email_unsubscribes", "unsubscribe_email", "send_email", "reply_to_email", "bulk_email", "delete_email", "archive_email", "mark_email_read", "resolve_contact", "ui_control"},
-        frozenset({"calendar", "event", "meeting", "schedule", "appointment"}):
+        frozenset({"calendar", "event", "meeting", "schedule", "appointment", "캘린더", "일정", "달력", "약속", "미팅", "스케줄", "회의"}):
             {"manage_calendar"},
         # Detached background `bash` jobs (#!bg): check on / read output / kill.
         frozenset({"background job", "background jobs", "bg job", "bg jobs",
@@ -360,7 +360,7 @@ class ToolIndex:
                    "check on that job", "job output", "kill the job",
                    "kill the background", "stop the background", "running job"}):
             {"manage_bg_jobs"},
-        frozenset({"note", "todo", "reminder", "remind", "checklist", "remember to"}):
+        frozenset({"note", "todo", "reminder", "remind", "checklist", "remember to", "메모", "할일", "투두", "리마인더", "알림", "기억해", "적어둬", "체크리스트"}):
             {"manage_notes"},
         # Chat/session management. "rename" alone maps to documents below, so a
         # request like "rename the last 12 sessions/chats" needs these session
@@ -371,54 +371,48 @@ class ToolIndex:
                    "rename the chat", "rename my chat", "rename the session",
                    "archive chat", "archive session", "delete chat",
                    "delete session", "fork chat", "fork session",
-                   "name the chats", "name my chats", "rename them"}):
+                   "name the chats", "name my chats", "rename them", "채팅", "세션"}):
             {"list_sessions", "manage_session"},
         frozenset({"recurring", "every day", "every hour", "every morning",
                    "every evening", "every night", "every week", "each morning",
                    "daily task", "background task", "scheduled task", "schedule a",
                    "automatically", "auto-summarize", "auto summarize",
                    "cron", "periodically", "on a schedule", "set up a task",
-                   "create a task", "summarize my inbox every", "remind me every"}):
+                   "create a task", "summarize my inbox every", "remind me every", "반복", "매일", "스케줄"}):
             {"manage_tasks"},
-        frozenset({"contact", "address", "phone", "who is"}):
+        frozenset({"contact", "address", "phone", "who is", "연락처", "주소록", "전화번호"}):
             {"resolve_contact", "manage_contact"},
         frozenset({"save contact", "add contact", "new contact", "update contact",
                    "edit contact", "delete contact", "remove contact",
                    "save this person", "add to contacts", "save to contacts",
-                   # "add <name> to (my) contacts" — words between 'add' and
-                   # 'contacts' break the literal phrase match above, so anchor
-                   # on the tail.
                    "to my contacts", "to contacts", "to address book",
-                   # "save this for <person>" / "save it for <person>" — the user
-                   # is storing info on a known person without using the literal
-                   # word 'contact'. Catches the address/phone-paste pattern.
                    "save this for", "save it for", "save for",
                    "save this one for", "save that for",
-                   # Postal-address-like signals
                    "postal code", "zip code", "street address",
                    "mailing address", "their address"}):
             {"manage_contact"},
-        # "Ask another model" intent → chat_with_model relays to a
-        # different model and returns its answer. ask_teacher escalates
-        # to the configured teacher. (second_opinion was removed.)
+        # "Ask another model" intent
         frozenset({"ask gpt", "ask claude", "ask gemini", "ask deepseek",
                    "ask minimax", "ask qwen", "ask the", "ask another model",
                    "what does", "what would", "second opinion", "other model",
                    "different model", "compare answers", "compare models",
-                   "delegate to", "have model"}):
+                   "delegate to", "have model", "다른 모델", "모델에게"}):
             {"chat_with_model", "ask_teacher", "list_models"},
-        # Deep research intent (incl. common typo "reserach")
+        # Deep research intent
         frozenset({"web search", "search the web", "search online", "look up",
                    "find info online", "find information online",
                    "find info", "find information", "online about",
                    "on the internet", "google", "latest", "current", "news",
-                   "weather", "forecast", "stock price", "price of"}):
+                   "weather", "forecast", "stock price", "price of", "검색", "찾아봐", "구글링", "뉴스", "최신", "알아봐", "인터넷"}):
             {"web_search", "web_fetch"},
         frozenset({"research", "reserach", "reasearch", "look into", "investigate",
                    "deep dive", "deep research", "find out about", "study up on",
-                   "report on", "do research", "look up everything"}):
+                   "report on", "do research", "look up everything", "리서치", "조사", "심층", "보고서"}):
             {"trigger_research"},
-        # Settings-change intent — "change my…/set my…/use X for…/turn on…".
+        # Stitch / UI Design intent
+        frozenset({"stitch", "스티치", "디자인", "화면", "와이어프레임", "랜딩페이지", "ui", "ux", "웹디자인", "컴포넌트", "시안"}):
+            {"manage_mcp"},
+        # Settings-change intent
         frozenset({"change my", "set my", "use the voice", "change the voice",
                    "my voice", "tts voice", "search engine", "default model",
                    "teacher model", "task model", "background model", "image quality",
@@ -426,46 +420,34 @@ class ToolIndex:
                    "speak faster", "speak slower", "agent timeout", "token budget",
                    "max tool calls", "use this model for", "use that model for",
                    "my settings", "change setting", "change a setting", "set setting",
-                   "preference", "preferences", "configure"}):
+                   "preference", "preferences", "configure", "설정", "옵션"}):
             {"manage_settings", "ui_control"},
-        # API-integration intent → the api_call tool. Mirrors the agent-loop
-        # "integrations" domain so api_call still surfaces on the retrieval and
-        # keyword-fallback paths (not just the deterministic domain seed) when a
-        # user names a connected service.
         frozenset({"api_call", "api call", "integration", "integrations",
                    "home assistant", "homeassistant", "miniflux", "gitea",
-                   "linkding", "jellyfin"}):
+                   "linkding", "jellyfin", "연동"}):
             {"api_call"},
-        # Managing EXISTING research in the Library — open/read/find/delete.
         frozenset({"my research", "the research", "research on", "open research",
                    "read research", "find research", "delete research",
                    "remove research", "list research", "my reports", "the report",
                    "saved research", "research library", "past research",
                    "research i did", "research about"}):
             {"manage_research", "trigger_research"},
-        # Document edit/update intent
         frozenset({"edit", "change", "fix", "rewrite", "update",
                    "replace", "add a", "tweak", "modify", "rename", "paragraph",
-                   "section", "line", "the doc", "the docs", "the document", "the documents", "in the doc", "in the docs", "in document"}):
+                   "section", "line", "the doc", "the docs", "the document", "the documents", "in the doc", "in the docs", "in document", "수정", "고쳐줘", "바꿔줘"}):
             {"edit_document", "update_document", "create_document", "suggest_document"},
-        # Document deletion / management — include generic open/find/read/show
-        # verbs + file/doc synonyms so "open my <X>", "find the <X>", "delete
-        # <X>" reach manage_documents even without the literal word "document".
         frozenset({"delete this doc", "delete the doc", "delete document",
                    "remove document", "remove the doc", "trash", "list document", "list documents",
                    "list doc", "list docs", "all my docs", "my document", "my documents", "my doc", "my docs", "my files",
                    "open the", "open my", "open document", "open doc", "find the",
                    "find my", "find document", "read the", "read my", "show me the",
                    "show my", "the file", "my file", "the report", "the write-up",
-                   "the writeup", "saved document", "in my library", "in the library"}):
+                   "the writeup", "saved document", "in my library", "in the library", "문서", "내 문서"}):
             {"manage_documents", "edit_document"},
-        # Theme / UI control intent
         frozenset({"theme", "color scheme", "colors of the ui", "make it dark",
                    "make it light", "make the ui", "switch theme", "change theme",
-                   "dark mode", "light mode", "toggle"}):
+                   "dark mode", "light mode", "toggle", "테마", "다크모드", "라이트모드"}):
             {"ui_control"},
-        # Cookbook / model serving intent — user says "kill cookbook",
-        # "stop the model", "what's running", etc.
         frozenset({"cookbook", "kill cookbook", "stop cookbook",
                    "stop the model", "kill the model", "kill my model",
                    "what's running", "what is running", "whats running",
@@ -473,7 +455,6 @@ class ToolIndex:
                    "shut down vllm", "shutdown vllm", "stop vllm",
                    "stop serving", "kill serve", "cancel serve"}):
             {"list_served_models", "stop_served_model"},
-        # Cookbook serve / launch / preset / server selection
         frozenset({"serve", "launch", "spin up", "start the model", "run the model",
                    "debug launch", "launch command", "drivers", "driver",
                    "preset", "presets", "which server", "what servers",
@@ -481,23 +462,19 @@ class ToolIndex:
                    "on the server", "on the gpu"}):
             {"serve_preset", "serve_model", "list_serve_presets",
              "list_cookbook_servers", "list_cached_models"},
-        # Cookbook downloads
         frozenset({"download", "downloading", "downloads",
                    "cancel download", "stop download", "kill download",
-                   "what's downloading", "download progress", "pull model", "grab model"}):
+                   "what's downloading", "download progress", "pull model", "grab model", "다운로드"}):
             {"list_downloads", "cancel_download", "download_model",
              "list_cookbook_servers"},
-        # HuggingFace search + cached model browse
         frozenset({"huggingface", "hugging face", "hf search",
                    "find a model", "search models", "search for a model",
-                   "models for", "best model for"}):
+                   "models for", "best model for", "허깅페이스"}):
             {"search_hf_models", "list_cached_models"},
         frozenset({"cached models", "list models", "my models",
                    "what models do i have", "is it downloaded",
                    "do i have", "already downloaded", "on disk"}):
             {"list_cached_models", "search_hf_models"},
-        # Tool on/off / panel open intent — user says "turn off shell",
-        # "disable search", "open library", "show gallery", etc.
         frozenset({"turn off", "turn on", "disable", "enable",
                    "shell off", "shell on", "search off", "search on",
                    "research off", "research on", "incognito",
@@ -509,9 +486,8 @@ class ToolIndex:
                    "show memory", "show memories", "show skills", "show notes",
                    "show chats", "show sessions", "show documents"}):
             {"ui_control"},
-        # Document creation intent
         frozenset({"write a", "create a doc", "draft", "compose", "poem", "story",
-                   "essay", "outline", "letter"}):
+                   "essay", "outline", "letter", "글작성", "초안", "작성해줘"}):
             {"create_document", "edit_document", "update_document"},
     }
 
@@ -522,14 +498,9 @@ class ToolIndex:
         base = set(always_include or ALWAYS_AVAILABLE)
         retrieved = self.retrieve(query, k=k)
         base.update(retrieved)
-        # Keyword-based force-include for common intents. Match on word
-        # boundaries, not raw substrings, so short hints like "fix", "line",
-        # "serve", "reply" or "unread" don't fire inside unrelated words
-        # ("prefix", "deadline"/"online", "observe"/"reserve", "replying",
-        # "unreadable"). Same word-boundary matching used in topic_analyzer.
         ql = query.lower()
         for keywords, tools in self._KEYWORD_HINTS.items():
-            if any(re.search(rf"\b{re.escape(kw)}\b", ql) for kw in keywords):
+            if any((kw in ql if any(ord(c) > 127 for c in kw) else bool(re.search(rf"\b{re.escape(kw)}\b", ql))) for kw in keywords):
                 base.update(tools)
         # Structural scheduling-intent detection — typo-resilient (the literal
         # keyword "every day" misses "every dya"). Catches "every <word>",
