@@ -164,9 +164,15 @@ class McpManager:
             if transport == "stdio":
                 res = await self._connect_stdio(server_id, name, command, args or [], env or {})
             elif transport == "sse":
-                res = await self._connect_sse(server_id, name, url, headers=env or {})
+                if env:
+                    res = await self._connect_sse(server_id, name, url, headers=env)
+                else:
+                    res = await self._connect_sse(server_id, name, url)
             elif transport == "http":
-                res = await self._start_http_connect(server_id, name, url, headers=env or {})
+                if env:
+                    res = await self._start_http_connect(server_id, name, url, headers=env)
+                else:
+                    res = await self._start_http_connect(server_id, name, url)
             else:
                 logger.error(f"Unknown MCP transport: {transport}")
                 res = False
