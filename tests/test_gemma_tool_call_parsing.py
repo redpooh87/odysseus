@@ -57,3 +57,18 @@ def test_strip_raw_openai_function_json_array_leak():
     )
 
     assert strip_tool_blocks(raw) == "Before\nAfter"
+
+
+def test_gemma_tool_call_mcp_tools_namespace():
+    raw = '<|tool_call>call:mcp_tools:manage_calendar{end_time: "2026-09-17T18:00:00", location: "베트남", start_time: "2026-09-13T09:00:00", summary: "사장님 베트남 출장"}<tool_call|>'
+
+    blocks = parse_tool_blocks(raw)
+
+    assert len(blocks) == 1
+    assert blocks[0].tool_type == "manage_calendar"
+    import json
+    parsed = json.loads(blocks[0].content)
+    assert parsed["summary"] == "사장님 베트남 출장"
+    assert parsed["action"] == "create_event"
+    assert strip_tool_blocks(raw).strip() == ""
+
