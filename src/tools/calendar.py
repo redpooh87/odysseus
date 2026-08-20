@@ -77,7 +77,12 @@ async def do_manage_calendar(content: str, owner: Optional[str] = None) -> Dict:
     # cosmetic typo back to the model and waste a round-trip. Also accept
     # short forms (`create`, `update`, `delete`) as aliases for the
     # full `<verb>_event` names — models keep emitting the short forms.
-    action = (args.get("action") or "list_events").replace("-", "_").strip().lower()
+    action = (args.get("action") or "").replace("-", "_").strip().lower()
+    if not action:
+        if (args.get("summary") or args.get("title")) and (args.get("start_time") or args.get("dtstart") or args.get("start") or args.get("when")):
+            action = "create_event"
+        else:
+            action = "list_events"
     _ACTION_ALIASES = {
         "create": "create_event",
         "update": "update_event",

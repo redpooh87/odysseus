@@ -168,7 +168,7 @@ _TOOL_CODE_CLOSE_RE = re.compile(r"\}\s*</tool_code>", re.IGNORECASE)
 
 # Pattern 4b: Gemma-style <|tool_call|> call:tool_name{args} <tool_call|>
 _GEMMA_TOOL_CALL_RE = re.compile(
-    r"<\|?tool_call\|?>\s*call:([\w\d_-]+)\s*(\{[\s\S]*?\})\s*<\|?tool_call\|?>",
+    r"<\|?tool_call\|?>\s*call:(?:mcp_tools?:|mcp_tools?__|mcp__|call:)?([A-Za-z0-9_.:-]+)\s*(\{[\s\S]*?\})\s*</?\|?tool_call\|?>",
     re.IGNORECASE,
 )
 
@@ -1122,6 +1122,13 @@ def _parse_tool_code_block(raw: str) -> Optional[ToolBlock]:
 def _parse_gemma_tool_call(tool_name: str, body: str) -> Optional[ToolBlock]:
     """Parse a Gemma-style call:tool_name{...} block into a ToolBlock."""
     tool_name = tool_name.strip().lower().replace("-", "_")
+    for prefix in ("mcp_tools:", "mcp_tools__", "mcp_tool:", "mcp_tool__", "mcp__", "call:"):
+        if tool_name.startswith(prefix):
+            tool_name = tool_name[len(prefix):]
+            break
+    if ":" in tool_name:
+        tool_name = tool_name.split(":")[-1]
+    tool_name = _TOOL_NAME_MAP.get(tool_name, tool_name)
     body = body.strip()
     if not body:
         return None
@@ -1149,6 +1156,10 @@ def _parse_gemma_tool_call(tool_name: str, body: str) -> Optional[ToolBlock]:
                 k = m.group(1)
                 v = m.group(2).strip()
                 params[k] = v
+
+    if tool_name == "manage_calendar" and not params.get("action"):
+        if (params.get("summary") or params.get("title")) and (params.get("start_time") or params.get("dtstart") or params.get("start") or params.get("when")):
+            params["action"] = "create_event"
 
     from src.tool_schemas import function_call_to_tool_block
     return function_call_to_tool_block(tool_name, json.dumps(params))
