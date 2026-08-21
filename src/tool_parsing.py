@@ -326,6 +326,14 @@ _TOOL_NAME_MAP = {
     "manage_bg_jobs": "manage_bg_jobs",
     "bg_jobs": "manage_bg_jobs",
     "background_jobs": "manage_bg_jobs",
+    "get_latest_emails": "list_emails",
+    "get_emails": "list_emails",
+    "emails": "list_emails",
+    "inbox": "list_emails",
+    "get_email": "read_email",
+    "view_email": "read_email",
+    "calendar": "manage_calendar",
+    "events": "manage_calendar",
 }
 
 _MISFENCED_WEB_TOOL_NAMES = {
@@ -1122,9 +1130,14 @@ def _parse_tool_code_block(raw: str) -> Optional[ToolBlock]:
 def _parse_gemma_tool_call(tool_name: str, body: str) -> Optional[ToolBlock]:
     """Parse a Gemma-style call:tool_name{...} block into a ToolBlock."""
     tool_name = tool_name.strip().lower().replace("-", "_")
-    for prefix in ("mcp_tools:", "mcp_tools__", "mcp_tool:", "mcp_tool__", "mcp__", "call:"):
-        if tool_name.startswith(prefix):
-            tool_name = tool_name[len(prefix):]
+    while True:
+        matched = False
+        for prefix in ("mcp_tools:", "mcp_tools__", "mcp_tool:", "mcp_tool__", "mcp__", "call:"):
+            if tool_name.startswith(prefix):
+                tool_name = tool_name[len(prefix):]
+                matched = True
+                break
+        if not matched:
             break
     if ":" in tool_name:
         tool_name = tool_name.split(":")[-1]
@@ -1160,6 +1173,16 @@ def _parse_gemma_tool_call(tool_name: str, body: str) -> Optional[ToolBlock]:
     if tool_name == "manage_calendar" and not params.get("action"):
         if (params.get("summary") or params.get("title")) and (params.get("start_time") or params.get("dtstart") or params.get("start") or params.get("when")):
             params["action"] = "create_event"
+
+    if tool_name == "list_emails":
+        if "limit" in params and "max_results" not in params:
+            params["max_results"] = params["limit"]
+    elif tool_name == "search_emails":
+        if "q" in params and "query" not in params:
+            params["query"] = params["q"]
+    elif tool_name == "read_email":
+        if "id" in params and "uid" not in params:
+            params["uid"] = str(params["id"])
 
     from src.tool_schemas import function_call_to_tool_block
     return function_call_to_tool_block(tool_name, json.dumps(params))

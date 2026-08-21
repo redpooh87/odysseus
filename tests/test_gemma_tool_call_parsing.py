@@ -72,3 +72,21 @@ def test_gemma_tool_call_mcp_tools_namespace():
     assert parsed["action"] == "create_event"
     assert strip_tool_blocks(raw).strip() == ""
 
+
+def test_gemma_tool_call_email_limit_and_aliases():
+    raw = '<|tool_call>call:mcp_tools:list_emails{limit:5}<tool_call|>'
+    blocks = parse_tool_blocks(raw)
+    assert len(blocks) == 1
+    assert blocks[0].tool_type == "mcp__email__list_emails"
+    import json
+    parsed = json.loads(blocks[0].content)
+    assert parsed["max_results"] == 5
+    assert strip_tool_blocks(raw).strip() == ""
+
+    raw_alias = '<|tool_call|>call:get_latest_emails{"limit": 3}<|tool_call|>'
+    blocks_alias = parse_tool_blocks(raw_alias)
+    assert len(blocks_alias) == 1
+    assert blocks_alias[0].tool_type == "mcp__email__list_emails"
+    parsed_alias = json.loads(blocks_alias[0].content)
+    assert parsed_alias["max_results"] == 3
+
